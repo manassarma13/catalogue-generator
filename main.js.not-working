@@ -1,0 +1,65 @@
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+async function searchAndScrape(searchTerm) {
+  try {
+    const amazonURL = `https://www.amazon.in/s?k=${encodeURIComponent(searchTerm)}`;
+    const flipkartURL = `https://www.flipkart.com/search?q=${encodeURIComponent(searchTerm)}`;
+
+    const [amazonResponse, flipkartResponse] = await Promise.all([
+      axios.get(amazonURL),
+      axios.get(flipkartURL)
+    ]);
+
+
+    const amazonProducts = extractProducts(amazonResponse.data, 'amazon');
+    const flipkartProducts = extractProducts(flipkartResponse.data, 'flipkart');
+
+      console.log('Amazon Response:', amazonResponse.data);
+    // console.log('Flipkart Response:', flipkartProducts);
+    console.log('Amazon Products:', amazonProducts);
+    console.log('Flipkart Products:', flipkartProducts);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+function extractProducts(html, platform) {
+  const products = [];
+  const $ = cheerio.load(html);
+
+  const selectors = getSelectorsForPlatform(platform);
+
+  $(selectors.productItem).each((index, element) => {
+    const titleElement = $(element).find(selectors.title);
+    const priceElement = $(element).find(selectors.price);
+
+    if (titleElement.length > 0 && priceElement.length > 0) {
+      const title = titleElement.text().trim();
+      const price = priceElement.text().trim();
+
+      products.push({ title, price, platform });
+    }
+  });
+
+  return products;
+}
+
+function getSelectorsForPlatform(platform) {
+  if (platform === 'amazon') {
+    return {
+      productItem: '.a-section',
+      title: '..a-section.a-spacing-none.puis-padding-right-small.s-title-instructions-style',
+      price: '.a-size-base.a-link-normal.s-no-hover.s-underline-text.s-underline-link-text.s-link-style.a-text-normal'
+    };
+  } else if (platform === 'flipkart') {
+    return {
+      productItem: '.flipkart-product-item',
+      title: '.flipkart-product-title',
+      price: '.flipkart-product-price'
+    };
+  }
+}
+
+const searchParameter = "XYZ smart TV";
+searchAndScrape(searchParameter);
