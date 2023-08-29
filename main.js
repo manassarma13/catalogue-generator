@@ -17,26 +17,26 @@ async function searchAndScrape() {
         await amazonPage.goto(`https://www.amazon.in/s?k=${encodeURIComponent(searchTerm)}`);
         await flipkartPage.goto(`https://www.flipkart.com/search?q=${encodeURIComponent(searchTerm)}`);
 
-        const amazonProducts = await scrapeProducts(amazonPage, 'amazon');
-        const flipkartProducts = await scrapeProducts(flipkartPage, 'flipkart');
+        const amazonResponse = await getPageResponse(amazonPage);
+        const flipkartResponse = await getPageResponse(flipkartPage);
 
-        console.log('Amazon Products:', amazonProducts);
-        console.log('Flipkart Products:', flipkartProducts);
+        console.log('Amazon Response:', amazonResponse);
+        console.log('Flipkart Response:', flipkartResponse);
 
         await browser.close();
     });
 }
 
-async function scrapeProducts(page, platform) {
-    const products = [];
+async function getPageResponse(page) {
+    const response = await page.evaluate(() => {
+        return {
+            url: window.location.href,
+            status: window.location.href,
+            content: document.documentElement.outerHTML
+        };
+    });
 
-    if (platform === 'amazon') {
-        products.push(page);
-    } else if (platform === 'flipkart') {
-        products.push(page);
-    }
-
-    return products;
+    return response;
 }
 
 searchAndScrape();
