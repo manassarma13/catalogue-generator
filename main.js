@@ -29,10 +29,33 @@ async function searchAndScrape() {
 
 async function getPageResponse(page) {
     const response = await page.evaluate(() => {
+        let containerSelector;
+        let website;
+
+        // Determine the website based on the URL
+        if (window.location.hostname.includes('amazon')) {
+            website = 'amazon';
+            containerSelector = '#search'; // Adjust the selector for Amazon
+        } else if (window.location.hostname.includes('flipkart')) {
+            website = 'flipkart';
+            containerSelector = '#container'; // Adjust the selector for Flipkart
+        }
+
+        if (!containerSelector) {
+            return {
+                url: window.location.href,
+                status: 'Website not recognized',
+                content: ''
+            };
+        }
+
+        const containerElement = document.querySelector(containerSelector);
+        const content = containerElement ? containerElement.outerHTML : '';
+
         return {
             url: window.location.href,
-            status: window.location.href,
-            content: document.documentElement.outerHTML
+            status: website,
+            content: content
         };
     });
 
