@@ -32,13 +32,12 @@ async function getPageResponse(page) {
         let containerSelector;
         let website;
 
-        // Determine the website based on the URL
         if (window.location.hostname.includes('amazon')) {
             website = 'amazon';
-            containerSelector = '#search'; // Adjust the selector for Amazon
+            containerSelector = '#search'; 
         } else if (window.location.hostname.includes('flipkart')) {
             website = 'flipkart';
-            containerSelector = '#container'; // Adjust the selector for Flipkart
+            containerSelector = '#container'; 
         }
 
         if (!containerSelector) {
